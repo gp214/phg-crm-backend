@@ -35,6 +35,16 @@ def read_events(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), 
 def create_event(event: schemas.EventCreate, db: Session = Depends(get_db), current_user: schemas.User = Depends(auth.get_current_user)):
     return crud.create_event(db=db, event=event, creator_id=current_user.id)
 
+@router.patch("/{event_id}", response_model=schemas.Event)
+def update_event(event_id: int, event_update: schemas.EventUpdate, db: Session = Depends(get_db), current_user: schemas.User = Depends(auth.get_current_user)):
+    db_event = crud.get_event(db, event_id)
+    if not db_event:
+        raise HTTPException(status_code=404, detail="Evento non trovato")
+    if db_event.creator_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Non autorizzato a modificare questo evento")
+    
+    return crud.update_event(db=db, event_id=event_id, event_update=event_update)
+
 @router.delete("/{event_id}")
 def delete_event(event_id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(auth.get_current_user)):
     db_event = db.query(models.Event).filter(models.Event.id == event_id).first()

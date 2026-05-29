@@ -5,21 +5,22 @@ from ..database import get_db
 from .. import crud, schemas
 
 router = APIRouter(
+    prefix="/api/notices",
     tags=["Notices"]
 )
 
-@router.get("/api/notices", response_model=List[schemas.Notice])
+@router.get("/", response_model=List[schemas.Notice])
 def read_notices(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return crud.get_notices(db, skip=skip, limit=limit)
 
-@router.post("/api/notices", response_model=schemas.Notice)
+@router.post("/", response_model=schemas.Notice)
 def create_notice(notice: schemas.NoticeCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user(db, user_id=notice.author_id)
     if not db_user:
         raise HTTPException(status_code=404, detail="Autore non trovato")
     return crud.create_notice(db=db, notice=notice)
 
-@router.delete("/api/notices/{notice_id}")
+@router.delete("/{notice_id}")
 def delete_notice(notice_id: int, db: Session = Depends(get_db)):
     success = crud.delete_notice(db, notice_id=notice_id)
     if not success:

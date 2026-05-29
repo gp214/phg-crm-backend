@@ -265,6 +265,34 @@ def create_event(db: Session, event: schemas.EventCreate, creator_id: int):
         
     return db_event
 
+def get_event(db: Session, event_id: int):
+    return db.query(models.Event).filter(models.Event.id == event_id).first()
+
+def update_event(db: Session, event_id: int, event_update: schemas.EventUpdate):
+    db_event = get_event(db, event_id)
+    if not db_event:
+        return None
+        
+    update_data = event_update.dict(exclude_unset=True)
+    
+    # Handle participants separately if they are provided
+    if "participant_ids" in update_data:
+        participant_ids = update_data.pop("participant_ids")
+        # Remove old participants
+        db.query(models.EventParticipant).filter(models.EventParticipant.event_id == event_id).delete()
+        # Add new participants
+        for p_id in participant_ids:
+            db_participant = models.EventParticipant(event_id=db_event.id, user_id=p_id)
+            db.add(db_participant)
+            
+    # Update other fields
+    for key, value in update_data.items():
+        setattr(db_event, key, value)
+        
+    db.commit()
+    db.refresh(db_event)
+    return db_event
+
 def delete_event(db: Session, event_id: int):
     db_event = db.query(models.Event).filter(models.Event.id == event_id).first()
     if db_event:

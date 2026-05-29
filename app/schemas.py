@@ -195,6 +195,13 @@ class EventBase(BaseModel):
 class EventCreate(EventBase):
     participant_ids: List[int] = []
 
+class EventUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    participant_ids: Optional[List[int]] = None
+
 class Event(EventBase):
     id: int
     creator_id: int

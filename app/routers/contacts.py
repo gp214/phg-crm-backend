@@ -5,18 +5,19 @@ from ..database import get_db
 from .. import crud, schemas
 
 router = APIRouter(
+    prefix="/api/contacts",
     tags=["Contacts"]
 )
 
-@router.get("/api/contacts", response_model=List[schemas.Contact])
+@router.get("/", response_model=List[schemas.Contact])
 def read_contacts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return crud.get_contacts(db, skip=skip, limit=limit)
 
-@router.post("/api/contacts", response_model=schemas.Contact)
+@router.post("/", response_model=schemas.Contact)
 def create_contact(contact: schemas.ContactCreate, db: Session = Depends(get_db)):
     return crud.create_contact(db=db, contact=contact)
 
-@router.delete("/api/contacts/{contact_id}")
+@router.delete("/{contact_id}")
 def delete_contact(contact_id: int, db: Session = Depends(get_db)):
     success = crud.delete_contact(db, contact_id=contact_id)
     if not success:

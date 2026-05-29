@@ -28,6 +28,21 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Utente non trovato")
     return db_user
 
+@router.post("/{user_id}/reset-password")
+def admin_reset_password(
+    user_id: int, 
+    reset_data: schemas.AdminPasswordReset, 
+    db: Session = Depends(get_db), 
+    current_user: schemas.User = Depends(auth.get_current_user)
+):
+    db_user = crud.get_user(db, user_id=user_id)
+    if not db_user:
+        raise HTTPException(status_code=404, detail="Utente non trovato")
+        
+    new_hashed = auth.get_password_hash(reset_data.new_password)
+    crud.update_user_password(db, user_id, new_hashed)
+    return {"message": "Password resettata con successo"}
+
 @router.post("/me/password")
 def change_password(
     password_data: schemas.PasswordChange,
