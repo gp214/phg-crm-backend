@@ -28,6 +28,13 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Utente non trovato")
     return db_user
 
+@router.delete("/{user_id}")
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    success = crud.delete_user(db, user_id=user_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Utente non trovato")
+    return {"message": "Utente eliminato con successo"}
+
 @router.post("/{user_id}/reset-password")
 def admin_reset_password(
     user_id: int, 
