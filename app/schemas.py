@@ -23,6 +23,9 @@ class User(UserBase):
         from_attributes = True
 
 # --- SCHEMI TOKEN ---
+
+class AdminPasswordReset(BaseModel):
+    new_password: str
 class Token(BaseModel):
     access_token: str
     token_type: str
